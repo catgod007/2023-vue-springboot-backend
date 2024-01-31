@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.source.mapper.IShopMapper">
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into t_shop(
+            name,tel,state,registerTime,address,logo,admin_id
+        )  values (
+                      #{name},#{tel},#{state},#{registerTime},#{address},#{logo},#{admin.id}
+                  )
+    </insert>
+    <update id="update">
+        update t_shop set
+                              name=#{name},tel=#{tel},state=#{state},registerTime=#{registerTime},
+                              address=#{address},logo=#{logo},admin_id=#{admin.id},manager=#{manager}
+        where id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from t_shop where id=#{id}
+    </delete>
+    <delete id="batchDelete">
+        delete from t_shop where id in
+        <foreach collection="list" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectAll" resultType="org.source.domain.Shop">
+        select * from t_shop
+    </select>
+
+    <select id="selectById" resultType="org.source.domain.Shop">
+        select * from t_shop where id=#{id}
+    </select>
+
+    <select id="selectByPage" resultMap="ShopMapper">
+        select s.*,e.id eid,e.username ename FROM t_shop s
+        LEFT JOIN t_employee e on s.admin_id=e.id
+        <include refid="keywordSQL"></include>
+        limit #{start},#{pageSize}
+    </select>
+    <resultMap id="ShopMapper" type="org.source.domain.Shop" >
+    <id column="id" property="id"></id>
+    <result column="tel" property="tel"></result>
+    <result column="name" property="name" ></result>
+    <result column="registerTime" property="registerTime"></result>
+    <result column="state" property="state"></result>
+    <result column="address" property="address"></result>
+    <result column="logo" property="logo"></result>
+    <result column="admin_id" property="admin_id"></result>
+
+    <association property="admin" javaType="org.source.domain.Employee">
+        <id column="eid" property="id"></id>
+        <result column="ename" property="username"></result>
+    </association>
+    </resultMap>
+
+
+    <select id="count" resultType="java.lang.Long">
+        select count(id) from t_shop s
+        <include refid="keywordSQL"></include>
+    </select>
+    <select id="selectByUserName" resultType="org.source.domain.Shop">
+        select * from t_shop where name=#{name}
+    </select>
+
+    <sql id="keywordSQL">
+        <where>
+            <if test="keyword !=null and keyword !=''">
+                s.name like concat('%',#{keyword},'%')
+            </if>
+        </where>
+    </sql>
+</mapper>

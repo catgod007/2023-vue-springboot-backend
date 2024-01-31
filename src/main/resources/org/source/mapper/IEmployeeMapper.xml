@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.source.mapper.IEmployeeMapper">
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into t_employee(
+            username,email,phone,state,salt,password,age,department_id,logininfo_id,shop_id
+        )  values (
+                      #{username},#{email},#{phone},#{state},#{salt},#{password},#{age},#{department_id},#{logininfo_id},#{shop_id}
+                  )
+    </insert>
+    <insert id="insertUser">
+        insert into t_employee( username,email,phone )
+            values ( #{username},#{email},#{phone} )
+    </insert>
+    <update id="update">
+        update t_employee set
+           username=#{username},email=#{email},phone=#{phone},state=#{state},salt=#{salt},password=#{password},
+           age=#{age},department_id=#{department_id},logininfo_id=#{logininfo_id},shop_id=#{shop_id}
+        where id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from t_employee where id=#{id}
+    </delete>
+    <delete id="batchDelete">
+        delete from t_employee where id in
+        <foreach collection="list" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectAll" resultType="org.source.domain.Employee">
+        select * from t_employee
+    </select>
+
+    <select id="selectById" resultType="org.source.domain.Employee">
+        select * from t_employee where id=#{id}
+    </select>
+
+    <select id="selectByPage" resultType="org.source.domain.Employee">
+        select * from t_employee
+        limit #{start},#{pageSize}
+    </select>
+
+    <select id="count" resultType="java.lang.Long">
+        select count(id) from t_employee e
+        <include refid="keywordSQL"></include>
+    </select>
+    <select id="selectByUserName" resultType="org.source.domain.Employee">
+        select * from t_employee where username=#{username}
+    </select>
+
+    <sql id="keywordSQL">
+        <where>
+            <if test="keyword !=null and keyword !=''">
+                e.name like concat('%',#{keyword},'%')
+            </if>
+        </where>
+    </sql>
+</mapper>

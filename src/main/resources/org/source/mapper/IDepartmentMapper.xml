@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.source.mapper.IDepartmentMapper">
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into t_department(
+            sn,name,dirPath,state,manager_id,parent_id
+        )  values (
+            #{sn},#{name},#{dirPath},#{state},#{manager.id},#{parent.id}
+                          )
+    </insert>
+
+    <update id="update" >
+        update  t_department set
+                sn=#{sn},name=#{name},dirPath=#{dirPath},state=#{state},
+                manager_id=#{manager.id},parent_id=#{parent.id}
+        where id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from t_department where id=#{id}
+    </delete>
+
+    <delete id="batchDelete">
+        delete from t_department where id in
+        <foreach collection="list" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectAll" resultType="org.source.domain.Department">
+        select * from t_department
+    </select>
+
+    <select id="selectById" resultType="org.source.domain.Department">
+        select * from t_department where id=#{id}
+    </select>
+
+    <select id="selectByPage" resultMap="DepartmentMap">
+        select d.*,e.id  eid,e.username ename,d1.id did,d1.name dname FROM t_department as d
+        LEFT JOIN t_employee as e on d.manager_id=e.id
+        LEFT JOIN t_department as d1 on d.parent_id=d1.id
+        <include refid="keywordSQL"></include>
+        limit #{start},#{pageSize}
+    </select>
+    <resultMap id="DepartmentMap" type="org.source.domain.Department" >
+        <id column="id" property="id"></id>
+        <result column="sn" property="sn"></result>
+        <result column="name" property="name" ></result>
+        <result column="dirPath" property="dirPath"></result>
+        <result column="state" property="state"></result>
+        <result column="manager_id" property="manager_id"></result>
+        <result column="parent_id" property="parent_id"></result>
+
+        <association property="manager" javaType="org.source.domain.Employee">
+            <id column="eid" property="id"></id>
+            <result column="ename" property="username"></result>
+        </association>
+
+        <association property="parent" javaType="org.source.domain.Department">
+            <id column="did" property="id"></id>
+            <result column="dname" property="name"></result>
+        </association>
+
+    </resultMap>
+
+    <select id="count" resultType="java.lang.Long">
+        select count(id) from t_department d
+        <include refid="keywordSQL"></include>
+    </select>
+
+    <sql id="keywordSQL">
+
+        <where>
+            <if test="keyword !=null and keyword !=''">
+                d.name like concat('%',#{keyword},'%')
+            </if>
+        </where>
+    </sql>
+</mapper>
